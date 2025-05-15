@@ -1,16 +1,14 @@
 import streamlit as st
 import requests
 
-# Configuração da API
+# Usa secrets do Streamlit para proteger a chave
 API_HOST = "tennis-api-atp-wta-itf.p.rapidapi.com"
-API_KEY = "a791779a9bmsh239457b82e00462p1d22c2jsn1085a3840c78"
+API_KEY = st.secrets["RAPIDAPI_KEY"]
 
 HEADERS = {
     "X-RapidAPI-Key": API_KEY,
     "X-RapidAPI-Host": API_HOST
 }
-
-# Funções auxiliares para requisições
 
 def buscar_jogador(nome):
     url = f"https://{API_HOST}/players"
@@ -30,8 +28,6 @@ def buscar_torneios(ano, nivel="ATP"):
     response = requests.get(url, headers=HEADERS, params=params)
     return response.json()
 
-# Streamlit UI
-
 st.title("🎾 Explorador de Tênis Profissional")
 
 aba = st.sidebar.selectbox("Escolha uma opção:", ["Buscar Jogador", "Buscar Torneios"])
@@ -41,7 +37,7 @@ if aba == "Buscar Jogador":
     if nome:
         dados = buscar_jogador(nome)
         if dados and dados.get("players"):
-            jogador = dados["players"][0]  # Pega o primeiro resultado
+            jogador = dados["players"][0]
             st.subheader(jogador["name"])
             st.write(f"País: {jogador.get('country')}")
             st.write(f"Ranking Atual: {jogador.get('ranking')}")
