@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
+import datetime
 
-# Usa secrets do Streamlit para proteger a chave
 API_HOST = "tennis-api-atp-wta-itf.p.rapidapi.com"
 API_KEY = st.secrets["RAPIDAPI_KEY"]
 
@@ -28,9 +28,15 @@ def buscar_torneios(ano, nivel="ATP"):
     response = requests.get(url, headers=HEADERS, params=params)
     return response.json()
 
+def buscar_partidas_por_data(data_str):
+    url = f"https://{API_HOST}/matches-by-date"
+    params = {"date": data_str}
+    response = requests.get(url, headers=HEADERS, params=params)
+    return response.json()
+
 st.title("🎾 Explorador de Tênis Profissional")
 
-aba = st.sidebar.selectbox("Escolha uma opção:", ["Buscar Jogador", "Buscar Torneios"])
+aba = st.sidebar.selectbox("Escolha uma opção:", ["Buscar Jogador", "Buscar Torneios", "Partidas por Data"])
 
 if aba == "Buscar Jogador":
     nome = st.text_input("Digite o nome do jogador:")
@@ -49,7 +55,7 @@ if aba == "Buscar Jogador":
                 for partida in partidas.get("matches", [])[:5]:
                     st.markdown(f"- **{partida['tournament']}** - {partida['round']} - {partida['result']}")
         else:
-            st.warning("Jogador não encontrado.")
+            st.warning("Jogador não encontrado ou API sem retorno.")
 
 elif aba == "Buscar Torneios":
     ano = st.number_input("Ano", min_value=2000, max_value=2025, value=2024)
@@ -61,3 +67,15 @@ elif aba == "Buscar Torneios":
                 st.markdown(f"🏟️ **{torneio['name']}** - {torneio['city']}, {torneio['country']} - {torneio['start_date']} a {torneio['end_date']}")
         else:
             st.warning("Nenhum torneio encontrado.")
+
+elif aba == "Partidas por Data":
+    data = st.date_input("Selecione uma data:", value=datetime.date.today() + datetime.timedelta(days=1))
+    if st.button("Buscar partidas"):
+        data_str = data.strftime("%Y-%m-%d")
+        dados = buscar_partidas_por_data(data_str)
+        if dados.get("matches"):
+            st.success(f"Partidas para {data_str}:")
+            for match in dados["matches"]:
+                st.markdown(f"🎾 {match['player1']} vs {match['player2']} — {match['tournament']} ({match['round']})")
+        else:
+            st.warning(f"Nenhuma partida encontrada para {data_str}.")
