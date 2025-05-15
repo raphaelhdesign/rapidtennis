@@ -3,7 +3,7 @@ import requests
 
 # Usa secrets do Streamlit para proteger a chave
 API_HOST = "tennis-api-atp-wta-itf.p.rapidapi.com"
-API_KEY = st.secrets["a791779a9bmsh239457b82e00462p1d22c2jsn1085a3840c78"]
+API_KEY = st.secrets["RAPIDAPI_KEY"]
 
 HEADERS = {
     "X-RapidAPI-Key": API_KEY,
